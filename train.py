@@ -16,9 +16,14 @@ def main():
     # 2) Tokenizer & model
     model_name = "distilbert-base-uncased"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
+    # model = AutoModelForSequenceClassification.from_pretrained(
+    #     model_name, num_labels=3
+    # )
+
     model = AutoModelForSequenceClassification.from_pretrained(
-        model_name, num_labels=3
-    )
+    model_name, num_labels=3
+    ).to(device)
+
 
     # 3) Tokenize (parallel)
     def tokenize(batch):
