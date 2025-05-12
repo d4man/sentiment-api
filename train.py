@@ -69,8 +69,6 @@ def main():
     logging_dir="./logs",
     logging_steps=50,
     save_strategy="epoch",
-)
-
 
     # 7) Define a Trainer
     trainer = Trainer(
