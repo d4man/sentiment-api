@@ -35,9 +35,9 @@ def main():
         remove_columns=["text"],
         load_from_cache_file=True,
     )
-    ds.set_format(type="torch", columns=["input_ids","attention_mask","label"])
+    ds.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
 
-    # 4) TrainingArguments (no load_best…)
+    # 4) TrainingArguments (final)
     args = TrainingArguments(
         output_dir="./fine_tuned_tweet_eval",
         num_train_epochs=2,
@@ -45,7 +45,13 @@ def main():
         per_device_eval_batch_size=16,
         eval_steps=500,
         save_steps=500,
+        evaluation_strategy="steps",
+        save_strategy="steps",
         save_total_limit=2,
+
+        # Load best model
+        load_best_model_at_end=True,
+        metric_for_best_model="eval_loss",
 
         # Speed & precision
         fp16=True,
