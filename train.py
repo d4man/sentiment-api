@@ -51,8 +51,8 @@ def main():
     # 1) Use half-precision (FP16)
     fp16=True,
 
-    # 2) Evaluate every epoch
-    evaluation_strategy="epoch",
+    # # 2) Evaluate every epoch
+    # evaluation_strategy="epoch",
 
     # 3) Speed up data loading
     dataloader_num_workers=4,
