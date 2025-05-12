@@ -43,15 +43,29 @@ def main():
     # 6) Configure training arguments
     output_dir = "./fine_tuned_tweet_eval"
     args = TrainingArguments(
-        output_dir=output_dir,
-        num_train_epochs=2,
-        per_device_train_batch_size=8,
-        per_device_eval_batch_size=16,
-        eval_steps=500,               # run evaluation every 500 steps
-        logging_dir="./logs",
-        logging_steps=50,
-        save_steps=500,               # save checkpoint every 500 steps
-    )
+    output_dir=output_dir,
+    num_train_epochs=2,
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=16,
+
+    # 1) Use half-precision (FP16)
+    fp16=True,
+
+    # 2) Evaluate every epoch
+    evaluation_strategy="epoch",
+
+    # 3) Speed up data loading
+    dataloader_num_workers=4,
+
+    # 4) Simulate a larger batch via accumulation
+    gradient_accumulation_steps=2,
+
+    logging_dir="./logs",
+    logging_steps=50,
+    save_strategy="epoch",
+    load_best_model_at_end=True,
+    metric_for_best_model="eval_loss",
+)
 
 
     # 7) Define a Trainer
