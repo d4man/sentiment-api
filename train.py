@@ -50,6 +50,12 @@ def main():
 
     # 1) Use half-precision (FP16)
     fp16=True,
+    eval_steps=500,         # run eval every 500 steps
+    save_steps=500,         # save checkpoint every 500 steps
+    load_best_model_at_end=True,
+    metric_for_best_model="eval_loss",
+        # …
+    )
 
     # # 2) Evaluate every epoch
     # evaluation_strategy="epoch",
@@ -63,8 +69,6 @@ def main():
     logging_dir="./logs",
     logging_steps=50,
     save_strategy="epoch",
-    load_best_model_at_end=True,
-    metric_for_best_model="eval_loss",
 )
 
 
