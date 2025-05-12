@@ -1,5 +1,7 @@
 # train.py
-
+import torch
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("Using device:", device)
 import os
 from datasets import load_dataset
 from transformers import (
