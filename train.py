@@ -13,11 +13,11 @@ def main():
     # 1) Load the tweet_eval sentiment dataset
     ds = load_dataset("tweet_eval", "sentiment")
 
-    # 2) Base model and tokenizer
+    # 2) Base model & tokenizer
     model_name = "distilbert-base-uncased"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    # 3) Tokenization
+    # 3) Tokenize (parallel & cached)
     def tokenize(batch):
         return tokenizer(
             batch["text"],
@@ -25,18 +25,24 @@ def main():
             truncation=True,
             max_length=128,
         )
-    ds = ds.map(tokenize, batched=True, num_proc=4, remove_columns=["text"])
+    ds = ds.map(
+        tokenize,
+        batched=True,
+        num_proc=4,
+        remove_columns=["text"],
+        load_from_cache_file=True,
+    )
 
     # 4) PyTorch format
     ds.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
 
-    # 5) Load model with 3 labels
+    # 5) Load model for 3-way classification
     model = AutoModelForSequenceClassification.from_pretrained(
         model_name,
         num_labels=3,
     )
 
-    # 6) TrainingArguments (all in one place!)
+    # 6) TrainingArguments using step-based eval & save
     output_dir = "./fine_tuned_tweet_eval"
     args = TrainingArguments(
         output_dir=output_dir,
@@ -46,23 +52,26 @@ def main():
         per_device_train_batch_size=8,
         per_device_eval_batch_size=16,
 
-        # evaluation & saving per epoch so load_best_model works
-        evaluation_strategy="epoch",
-        save_strategy="epoch",
+        # step-based evaluation & checkpointing
+        eval_steps=500,
+        save_steps=500,
+        save_total_limit=2,               # keep only last 2 checkpoints
         load_best_model_at_end=True,
         metric_for_best_model="eval_loss",
 
-        # speedups & precision
+        # speed & precision
         fp16=True,
         gradient_accumulation_steps=2,
         dataloader_num_workers=4,
+        # avoid wandb prompt
+        report_to=[],
 
         # logging
         logging_dir="./logs",
         logging_steps=50,
     )
 
-    # 7) Create Trainer
+    # 7) Trainer
     trainer = Trainer(
         model=model,
         args=args,
@@ -71,12 +80,12 @@ def main():
         tokenizer=tokenizer,
     )
 
-    # 8) Run training & evaluation
+    # 8) Train & evaluate
     trainer.train()
     metrics = trainer.evaluate()
     print("Eval metrics:", metrics)
 
-    # 9) Save model & tokenizer
+    # 9) Save final model & tokenizer
     trainer.save_model(output_dir)
     tokenizer.save_pretrained(output_dir)
     print(f"Model and tokenizer saved to {output_dir}/")
