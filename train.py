@@ -45,7 +45,7 @@ def main():
         per_device_eval_batch_size=16,
         eval_steps=500,
         save_steps=500,
-        evaluation_strategy="steps",
+        eval_strategy="steps",
         save_strategy="steps",
         save_total_limit=2,
 
